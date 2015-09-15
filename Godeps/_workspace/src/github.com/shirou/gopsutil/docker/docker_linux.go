@@ -9,9 +9,11 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"path/filepath"
 
 	common "github.com/shirou/gopsutil/common"
 	cpu "github.com/shirou/gopsutil/cpu"
+	net "github.com/shirou/gopsutil/net"
 )
 
 // GetDockerIDList returnes a list of DockerID.
@@ -172,6 +174,10 @@ func CgroupMem(containerid string, base string) (*CgroupMemStat, error) {
 
 func CgroupMemDocker(containerid string) (*CgroupMemStat, error) {
 	return CgroupMem(containerid, "/sys/fs/cgroup/memory/docker")
+}
+
+func NetIOCountersDocker(pid int) ([]net.NetIOCountersStat, error)  {
+	return net.NetIOCountersByPath(filepath.Join("/", "rootfs", "proc", strconv.Itoa(pid), "net", "dev"), true)
 }
 
 func (m CgroupMemStat) String() string {

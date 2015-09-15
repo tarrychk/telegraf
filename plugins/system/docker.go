@@ -4,6 +4,7 @@ package system
 
 import (
 	"fmt"
+	"net"
 
 	"github.com/influxdb/telegraf/plugins"
 )
@@ -74,6 +75,33 @@ func (s *DockerStats) Gather(acc plugins.Accumulator) error {
 		acc.Add("total_inactive_file", cont.Mem.TotalInactiveFile, tags)
 		acc.Add("total_active_file", cont.Mem.TotalActiveFile, tags)
 		acc.Add("total_unevictable", cont.Mem.TotalUnevictable, tags)
+
+		for _, io := range cont.Net {
+			iface, err := net.InterfaceByName(io.Name)
+			if err != nil {
+				continue
+			}
+
+			if iface.Flags&net.FlagLoopback == net.FlagLoopback {
+				continue
+			}
+
+			if iface.Flags&net.FlagUp == 0 {
+				continue
+			}
+
+			tags["interface"] = io.Name
+
+			acc.Add("bytes_sent", io.BytesSent, tags)
+			acc.Add("bytes_recv", io.BytesRecv, tags)
+			acc.Add("packets_sent", io.PacketsSent, tags)
+			acc.Add("packets_recv", io.PacketsRecv, tags)
+			acc.Add("err_in", io.Errin, tags)
+			acc.Add("err_out", io.Errout, tags)
+			acc.Add("drop_in", io.Dropin, tags)
+			acc.Add("drop_out", io.Dropout, tags)
+		}
+
 	}
 
 	return nil

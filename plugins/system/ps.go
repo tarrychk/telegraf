@@ -22,6 +22,7 @@ type DockerContainerStat struct {
 	Labels  map[string]string
 	CPU     *cpu.CPUTimesStat
 	Mem     *docker.CgroupMemStat
+	Net	[]net.NetIOCountersStat
 }
 
 type PS interface {
@@ -146,6 +147,15 @@ func (s *systemPS) DockerStat() ([]*DockerContainerStat, error) {
 			return nil, err
 		}
 
+		cnt, err := s.dockerClient.InspectContainer(container.ID)
+		if err != nil {
+			return nil, err
+		}
+		net, err := docker.NetIOCountersDocker(cnt.State.Pid)
+		if err != nil {
+			return nil, err
+		}
+
 		name := strings.Join(container.Names, " ")
 
 		stats = append(stats, &DockerContainerStat{
@@ -155,6 +165,7 @@ func (s *systemPS) DockerStat() ([]*DockerContainerStat, error) {
 			Labels:  container.Labels,
 			CPU:     ctu,
 			Mem:     mem,
+			Net:     net,
 		})
 	}
 

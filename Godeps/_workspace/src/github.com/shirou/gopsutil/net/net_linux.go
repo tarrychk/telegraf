@@ -5,6 +5,7 @@ package net
 import (
 	"strconv"
 	"strings"
+	"path/filepath"
 
 	common "github.com/shirou/gopsutil/common"
 )
@@ -15,7 +16,14 @@ import (
 // every network interface installed on the system is returned
 // separately.
 func NetIOCounters(pernic bool) ([]NetIOCountersStat, error) {
-	filename := "/rootfs/proc/net/dev"
+	return NetIOCountersByPID(1, pernic)
+}
+
+func NetIOCountersByPID(pid int, pernic bool) ([]NetIOCountersStat, error) {
+	return NetIOCountersByPath(filepath.Join("/", "rootfs", "proc", strconv.Itoa(pid), "net", "dev"), pernic)
+}
+
+func NetIOCountersByPath(filename string, pernic bool) ([]NetIOCountersStat, error) {
 	lines, err := common.ReadLines(filename)
 	if err != nil {
 		return nil, err

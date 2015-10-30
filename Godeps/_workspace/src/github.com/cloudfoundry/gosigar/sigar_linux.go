@@ -23,7 +23,7 @@ var Procd string
 func init() {
 	system.ticks = 100 // C.sysconf(C._SC_CLK_TCK)
 
-	Procd = "/proc"
+	Procd = "/rootfs/proc"
 
 	// grab system boot time
 	readFile(Procd+"/stat", func(line string) bool {

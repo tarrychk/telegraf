@@ -21,7 +21,7 @@ var _ = Describe("sigarLinux", func() {
 	})
 
 	AfterEach(func() {
-		sigar.Procd = "/proc"
+		sigar.Procd = "/rootfs/proc"
 	})
 
 	Describe("CPU", func() {
